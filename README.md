@@ -8,6 +8,12 @@ before and after. It exits 1 when the heap grew by more than 20 MB.
 
 The [Actions](../../actions) workflow runs it on macOS and on Linux.
 
+The leak needs `fsevents` (tsx lists it as an optionalDependency): tsx's
+bundled chokidar v3 only uses its FSEvents handler when `fsevents` resolves,
+and that handler is the one that never dedupes a repeated `add()`. This repo
+declares `fsevents` itself, because a bare `npm install` of tsx on the macOS
+runner did not install it.
+
 ```sh
 npm install
 node leak.cjs

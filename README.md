@@ -8,14 +8,19 @@ before and after. It exits 1 when the heap grew by more than 20 MB.
 
 The [Actions](../../actions) workflow runs it on macOS and on Linux.
 
-The leak needs `fsevents` (tsx lists it as an optionalDependency): tsx's
-bundled chokidar v3 only uses its FSEvents handler when `fsevents` resolves,
-and that handler is the one that never dedupes a repeated `add()`. This repo
-declares `fsevents` itself, because a bare `npm install` of tsx on the macOS
-runner did not install it.
+The leak needs `fsevents`, which tsx lists as an optionalDependency: tsx's
+bundled chokidar v3 uses its FSEvents handler only when `fsevents` resolves,
+and that handler is the one that never dedupes a repeated `add()`. Without
+`fsevents`, chokidar falls back to `fs.watch`, which skips already-watched
+files, and nothing leaks. `leak.cjs` prints which handler is in use.
+
+CI installs with pnpm. On the macOS runner, npm 11.19 did not install
+`fsevents` at all (`npm ls fsevents` was empty, even after
+`npm install fsevents@2.3.3`), so an npm-based run there never reaches
+the FSEvents handler.
 
 ```sh
-npm install
+pnpm install
 node leak.cjs
 ```
 

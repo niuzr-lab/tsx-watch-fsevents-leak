@@ -1,6 +1,7 @@
 # tsx watch leaks a chokidar listener per watched file on every restart (macOS)
 
-Minimal reproduction for tsx 4.23.15.
+Minimal reproduction for tsx 4.23.15, reported in
+https://github.com/privatenumber/tsx/issues/855.
 
 `node leak.cjs` generates 600 modules, runs `tsx watch` on them, edits one
 module 150 times, and prints the watch parent's heap (after a full GC)

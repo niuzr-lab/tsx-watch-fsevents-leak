@@ -1,0 +1,11 @@
+{
+  "name": "tsx-watch-fsevents-leak",
+  "private": true,
+  "description": "Minimal reproduction: tsx watch keeps one more chokidar listener per watched file on every restart (macOS)",
+  "scripts": {
+    "repro": "node leak.cjs"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}

@@ -16,6 +16,10 @@ const LIMIT_MB = Number(process.env.LIMIT_MB || 20);
 
 const cli = require.resolve('tsx/cli');
 const tsxVersion = JSON.parse(fs.readFileSync(path.join(path.dirname(cli), '..', 'package.json'), 'utf8')).version;
+// tsx's bundled chokidar v3 uses its FSEvents handler only when `fsevents`
+// resolves from tsx's own location; otherwise it falls back to fs.watch.
+let fsevents = 'not installed (chokidar falls back to fs.watch)';
+try { require.resolve('fsevents', { paths: [path.dirname(cli)] }); fsevents = 'installed (chokidar uses FSEvents)'; } catch {}
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsx-leak-'));
 for (let i = 1; i < FILES; i++) fs.writeFileSync(path.join(dir, `m${i}.ts`), `export const v${i} = ${i};\n`);
@@ -62,7 +66,7 @@ async function heapMB() {
 }
 
 (async () => {
-  console.log(`tsx ${tsxVersion}, node ${process.version}, ${process.platform}/${process.arch}; ${FILES} files, ${RESTARTS} restarts`);
+  console.log(`tsx ${tsxVersion}, node ${process.version}, ${process.platform}/${process.arch}; fsevents ${fsevents}; ${FILES} files, ${RESTARTS} restarts`);
   await waitBoot(0);
   await sleep(500);
   const before = await heapMB();
